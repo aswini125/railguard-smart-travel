@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RailGuard — Smart Travel Intelligence</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">🚄</div>
+    RailGuard
+  </div>
+  <div class="nav-pills">
+    <button class="nav-pill active" onclick="showSection('smart')">Smart Search</button>
+    <button class="nav-pill emergency" onclick="showSection('emergency')">🚨 Emergency Booking</button>
+    <button class="nav-pill" onclick="showSection('dashboard')">Dashboard</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ===================== SMART SEARCH SECTION ===================== -->
+<div id="smart-section">
+  <section class="hero">
+    <div class="hero-tag"><span class="pulse-dot"></span>AI-Powered Travel Intelligence</div>
+    <h1>Book Smarter,<br/>Travel <span>Better</span></h1>
+    <p class="hero-sub">Our AI analyzes budget, crowd levels, weather, and urgency to find your perfect journey — not just any seat.</p>
+  </section>
+
+  <section class="search-panel">
+    <div class="search-card">
+      <div class="search-grid">
+        <div class="field-group">
+          <label class="field-label">From</label>
+          <input class="field-input" id="fromCity" type="text" placeholder="New Delhi" value="New Delhi"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label">To</label>
+          <input class="field-input" id="toCity" type="text" placeholder="Mumbai" value="Mumbai"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Date</label>
+          <input class="field-input" id="travelDate" type="date"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Class</label>
+          <select class="field-input" id="travelClass">
+            <option value="SL">Sleeper (SL)</option>
+            <option value="3A">3 Tier AC</option>
+            <option value="2A">2 Tier AC</option>
+            <option value="1A">1st AC</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="prefs-row">
+        <span class="pref-label">Priority:</span>
+        <div class="pref-chip" data-pref="budget" onclick="togglePref(this)">💰 Budget</div>
+        <div class="pref-chip" data-pref="speed" onclick="togglePref(this)">⚡ Speed</div>
+        <div class="pref-chip selected" data-pref="crowd" onclick="togglePref(this)">🧘 Less Crowd</div>
+        <div class="pref-chip" data-pref="comfort" onclick="togglePref(this)">🛏️ Comfort</div>
+        <span class="pref-label" style="margin-left:16px">Urgency:</span>
+        <div class="pref-chip" data-pref="today" onclick="togglePref(this)">🔥 Today</div>
+        <div class="pref-chip" data-pref="flexible" onclick="togglePref(this)">📅 Flexible</div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-ai" onclick="searchTrains(true)">🤖 Best Train for Me</button>
+        <button class="btn btn-primary" onclick="searchTrains(false)">🔍 Search All</button>
+        <button class="btn btn-emergency" onclick="showSection('emergency')">🚨 Emergency Booking</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="results-section" id="results-section">
+    <!-- Loading state -->
+    <div id="loading-state" style="padding:0 0 24px">
+      <div class="shimmer shimmer-card"></div>
+      <div class="shimmer shimmer-card" style="height:180px"></div>
+    </div>
+
+    <!-- Actual results -->
+    <div id="results-content" style="display:none">
+      <!-- Weather strip -->
+      <div class="weather-strip" id="weather-strip"></div>
+
+      <!-- AI Bar -->
+      <div class="ai-bar" id="ai-bar">
+        <div class="ai-icon">🤖</div>
+        <div class="ai-text">
+          <strong id="ai-recommendation"></strong>
+          <span id="ai-reasoning"></span>
+        </div>
+      </div>
+
+      <!-- Compare tabs -->
+      <div class="section-title">
+        Available Trains <span class="badge" id="train-count">0 Results</span>
+      </div>
+      <div class="compare-tabs">
+        <div class="compare-tab active" onclick="filterCards('all', this)">All Trains</div>
+        <div class="compare-tab" onclick="filterCards('cheap', this)">💰 Cheapest</div>
+        <div class="compare-tab" onclick="filterCards('fast', this)">⚡ Fastest</div>
+        <div class="compare-tab" onclick="filterCards('empty', this)">🧘 Least Crowded</div>
+      </div>
+
+      <div class="cards-grid" id="cards-grid"></div>
+
+      <!-- Alt routes -->
+      <div class="alt-routes" id="alt-routes">
+        <div class="alt-title">🔀 AI-Suggested Alternative Routes</div>
+        <div id="alt-routes-list"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ===================== EMERGENCY SECTION ===================== -->
+<div id="emergency-section" style="display:none">
+  <section class="emergency-section visible">
+    <div class="emergency-header">
+      <div class="emergency-icon">🚨</div>
+      <div>
+        <div class="emergency-title">Emergency & Priority Booking</div>
+        <div class="emergency-sub">Fast-track booking for medical emergencies, senior citizens, and defense personnel.<br/>Priority seat allocation with verification and instant confirmation.</div>
+      </div>
+    </div>
+
+    <div class="section-title">Select Priority Category</div>
+    <div class="priority-types">
+      <div class="priority-type" onclick="selectPriority(this,'medical')" id="pt-medical">
+        <div class="pt-icon">🏥</div>
+        <div class="pt-name">Medical Emergency</div>
+        <div class="pt-desc">Critical medical travel, patient transport, or urgent hospital admission.</div>
+      </div>
+      <div class="priority-type" onclick="selectPriority(this,'senior')" id="pt-senior">
+        <div class="pt-icon">👴</div>
+        <div class="pt-name">Senior Citizen</div>
+        <div class="pt-desc">60+ passengers with priority lower berth allocation and assistance.</div>
+      </div>
+      <div class="priority-type" onclick="selectPriority(this,'defense')" id="pt-defense">
+        <div class="pt-icon">🎖️</div>
+        <div class="pt-name">Defense Personnel</div>
+        <div class="pt-desc">Active duty and veterans with concession and priority access.</div>
+      </div>
+    </div>
+
+    <div class="emergency-form" id="emergency-form" style="display:none">
+      <div class="form-title" id="emergency-form-title">🏥 Medical Emergency Booking</div>
+      <div class="form-grid">
+        <div class="field-group">
+          <label class="field-label">Passenger Name</label>
+          <input class="field-input" id="em-name" placeholder="Full Name"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label">ID / Doc Number</label>
+          <input class="field-input" id="em-doc" placeholder="Aadhar / Service ID / Medical Cert No."/>
+        </div>
+        <div class="field-group">
+          <label class="field-label">From</label>
+          <input class="field-input" id="em-from" placeholder="New Delhi"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label">To</label>
+          <input class="field-input" id="em-to" placeholder="Mumbai"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Date of Travel</label>
+          <input class="field-input" type="date" id="em-date"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Contact Number</label>
+          <input class="field-input" id="em-phone" placeholder="+91 XXXXX XXXXX"/>
+        </div>
+      </div>
+      <div class="field-group" id="em-reason-group">
+        <label class="field-label">Reason / Remarks</label>
+        <input class="field-input" id="em-reason" placeholder="Brief medical/defense reason for emergency booking"/>
+      </div>
+
+      <div class="verify-steps">
+        <div class="step"><div class="step-num">01</div><div class="step-text">Submit Request</div></div>
+        <div class="step"><div class="step-num">02</div><div class="step-text">AI Verification</div></div>
+        <div class="step"><div class="step-num">03</div><div class="step-text">Priority Allocation</div></div>
+        <div class="step"><div class="step-num">04</div><div class="step-text">Fast Confirmation</div></div>
+      </div>
+
+      <div style="margin-top:24px;display:flex;gap:12px">
+        <button class="btn btn-emergency" style="padding:14px 32px" onclick="submitEmergency()">
+          🚨 Submit Priority Request
+        </button>
+        <button class="btn btn-primary" onclick="searchEmergencyTrains()">
+          🔍 Find Emergency Trains
+        </button>
+      </div>
+    </div>
+
+    <!-- Emergency train results -->
+    <div id="em-results" style="display:none">
+      <div class="section-title">Priority Trains Available <span class="badge" style="background:rgba(255,69,96,0.15);color:var(--danger)">EMERGENCY QUOTA</span></div>
+      <div class="cards-grid" id="em-cards-grid"></div>
+    </div>
+  </section>
+</div>
+
+<!-- ===================== DASHBOARD SECTION ===================== -->
+<div id="dashboard-section" style="display:none">
+  <section class="hero">
+    <div class="hero-tag"><span class="pulse-dot"></span>Live Analytics</div>
+    <h1>Travel <span>Dashboard</span></h1>
+    <p class="hero-sub">Real-time stats on bookings, crowd levels, and emergency requests.</p>
+  </section>
+  <section class="stats-dashboard">
+    <div class="stats-row-top">
+      <div class="stat-card">
+        <div class="stat-card-val" style="color:var(--accent)">2,847</div>
+        <div class="stat-card-label">Trains Tracked Today</div>
+        <div class="stat-card-change">↑ 12% from yesterday</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-val" style="color:var(--accent2)">94.2%</div>
+        <div class="stat-card-label">AI Recommendation Accuracy</div>
+        <div class="stat-card-change">↑ 2.1% this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-val" style="color:var(--danger)">347</div>
+        <div class="stat-card-label">Emergency Bookings Today</div>
+        <div class="stat-card-change">Medical: 198 | Senior: 89 | Defense: 60</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-val" style="color:var(--gold)">₹847</div>
+        <div class="stat-card-label">Avg. Savings via AI Picks</div>
+        <div class="stat-card-change">↑ ₹120 vs manual booking</div>
+      </div>
+    </div>
+    <div class="cards-grid">
+      <div class="train-card">
+        <div class="card-header">
+          <div><div class="train-name">Top Route: Del → Mum</div><div class="train-number">38,492 bookings this week</div></div>
+          <div class="card-badges"><span class="card-badge badge-fast">BUSIEST</span></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-val" style="color:var(--accent)">78%</div><div class="stat-key">Avg Fill</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:var(--accent2)">₹1,240</div><div class="stat-key">Avg Fare</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:var(--gold)">16h</div><div class="stat-key">Avg Time</div></div>
+        </div>
+        <div class="avail-row">
+          <div class="avail-label"><span>Current Occupancy</span><span>78%</span></div>
+          <div class="avail-bar"><div class="avail-fill fill-yellow" style="width:78%"></div></div>
+        </div>
+      </div>
+      <div class="train-card">
+        <div class="card-header">
+          <div><div class="train-name">Top Route: Che → Ben</div><div class="train-number">22,108 bookings this week</div></div>
+          <div class="card-badges"><span class="card-badge badge-empty">LOW CROWD</span></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-val" style="color:var(--accent2)">41%</div><div class="stat-key">Avg Fill</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:var(--accent2)">₹890</div><div class="stat-key">Avg Fare</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:var(--gold)">26h</div><div class="stat-key">Avg Time</div></div>
+        </div>
+        <div class="avail-row">
+          <div class="avail-label"><span>Current Occupancy</span><span>41%</span></div>
+          <div class="avail-bar"><div class="avail-fill fill-green" style="width:41%"></div></div>
+        </div>
+      </div>
+      <div class="train-card priority-card">
+        <div class="card-header">
+          <div><div class="train-name">Emergency Quota</div><div class="train-number">Priority Seats Reserved Nationwide</div></div>
+          <div class="card-badges"><span class="card-badge badge-prio">PRIORITY</span></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-val" style="color:var(--priority)">4,200</div><div class="stat-key">Seats Reserved</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:var(--danger)">347</div><div class="stat-key">Used Today</div></div>
+          <div class="stat-box"><div class="stat-val" style="color:var(--accent2)">3,853</div><div class="stat-key">Available</div></div>
+        </div>
+        <div class="avail-row">
+          <div class="avail-label"><span>Quota Usage</span><span>8.3%</span></div>
+          <div class="avail-bar"><div class="avail-fill fill-green" style="width:8.3%"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+</main>
+
+<!-- ===================== BOOKING MODAL ===================== -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+
+    <!-- Booking form -->
+    <div id="modal-booking">
+      <div class="modal-title" id="modal-title">Confirm Booking</div>
+      <div class="modal-sub" id="modal-sub">Review your journey details</div>
+
+      <div class="confirm-row">
+        <div class="confirm-icon" id="modal-icon">🚄</div>
+        <div class="confirm-info">
+          <strong id="modal-train-name">Rajdhani Express</strong>
+          <span id="modal-train-details">New Delhi → Mumbai | 16:35 → 08:15</span>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div class="field-group">
+          <label class="field-label">Passenger Name</label>
+          <input class="field-input" id="modal-passenger" placeholder="Full Name"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Age</label>
+          <input class="field-input" id="modal-age" placeholder="25" type="number"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Phone</label>
+          <input class="field-input" id="modal-phone" placeholder="+91 XXXXX XXXXX"/>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Email</label>
+          <input class="field-input" id="modal-email" placeholder="you@email.com"/>
+        </div>
+      </div>
+
+      <div class="confirm-row" style="justify-content:space-between">
+        <div class="confirm-info">
+          <strong>Total Fare</strong>
+          <span id="modal-price-desc">Including taxes & fees</span>
+        </div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800" id="modal-price">₹2,450</div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-confirm" onclick="confirmBooking()">✓ Confirm & Pay</button>
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div class="success-modal" id="modal-success">
+      <div class="success-icon">🎉</div>
+      <div class="modal-title" style="text-align:center;color:var(--accent2)">Booking Confirmed!</div>
+      <div class="modal-sub" style="text-align:center;margin-bottom:24px" id="success-pnr"></div>
+      <div class="confirm-row">
+        <div class="confirm-icon" id="success-icon">🚄</div>
+        <div class="confirm-info">
+          <strong id="success-train"></strong>
+          <span id="success-details"></span>
+        </div>
+      </div>
+      <button class="btn-confirm" style="margin-top:20px;width:100%" onclick="closeModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
