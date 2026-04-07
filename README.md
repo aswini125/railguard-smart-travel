@@ -37,7 +37,7 @@ railguard-smart-travel/
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/railguard-smart-travel.git
+   git clone https://github.com/aswini125/railguard-smart-travel.git
    ```
 
 2. Navigate into the folder:
@@ -92,12 +92,4 @@ railguard-smart-travel/
 - [ ] Payment gateway integration
 - [ ] Multi-language support (Hindi, Tamil, Telugu)
 
----
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
----
-
-> Built with ❤️ to make Indian rail travel smarter and more accessible.
+Indian rail travel smarter and more accessible.
